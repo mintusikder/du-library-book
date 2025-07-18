@@ -1,14 +1,20 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { axiosSecure } from "../../hook/useAxiosSecure";
 
+// Updated to use axiosSecure
 const fetchBooks = async () => {
-  const res = await fetch("http://localhost:3000/books");
-  if (!res.ok) throw new Error("Failed to fetch books");
-  return res.json();
+  const res = await axiosSecure.get("/books");
+  return res.data;
 };
 
 const AllBooks = () => {
-  const { data: books = [], isLoading, isError, error } = useQuery({
+  const {
+    data: books = [],
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ["books"],
     queryFn: fetchBooks,
   });
@@ -17,26 +23,22 @@ const AllBooks = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
-  // Filter books by title, author, publisher, category
-const filteredBooks = useMemo(() => {
-  if (!searchTerm) return books;
-  const term = searchTerm.toLowerCase();
-  return books.filter((book) => {
-    return (
-      typeof book.book_title === "string" &&
-      book.book_title.toLowerCase().includes(term)
-    ) || (
-      typeof book.author === "string" &&
-      book.author.toLowerCase().includes(term)
-    ) || (
-      typeof book.publisher === "string" &&
-      book.publisher.toLowerCase().includes(term)
-    ) || (
-      typeof book.category === "string" &&
-      book.category.toLowerCase().includes(term)
-    );
-  });
-}, [books, searchTerm]);
+  const filteredBooks = useMemo(() => {
+    if (!searchTerm) return books;
+    const term = searchTerm.toLowerCase();
+    return books.filter((book) => {
+      return (
+        (typeof book.book_title === "string" &&
+          book.book_title.toLowerCase().includes(term)) ||
+        (typeof book.author === "string" &&
+          book.author.toLowerCase().includes(term)) ||
+        (typeof book.publisher === "string" &&
+          book.publisher.toLowerCase().includes(term)) ||
+        (typeof book.category === "string" &&
+          book.category.toLowerCase().includes(term))
+      );
+    });
+  }, [books, searchTerm]);
 
   const totalPages = Math.ceil(filteredBooks.length / rowsPerPage);
 
