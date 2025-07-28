@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { axiosSecure } from "../../hook/useAxiosSecure";
+import Loading from "../Shared/Loading";
 
 // Updated to use axiosSecure
 const fetchBooks = async () => {
@@ -65,7 +66,7 @@ const AllBooks = () => {
       />
 
       {isLoading ? (
-        <p>Loading books...</p>
+        <Loading></Loading>
       ) : isError ? (
         <p className="text-red-500">Error: {error.message}</p>
       ) : (
