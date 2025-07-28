@@ -3,6 +3,8 @@ import MainLayout from "../pages/layout/MainLayout";
 import Home from "../pages/Home/Home";
 import Login from "../pages/Authentication/Login";
 import Register from "../pages/Authentication/Register";
+import AdminRoute from "./AdminRoute";
+import AdminDashboard from "../pages/AdminDashboard/AdminDashboard";
 
 export const router = createBrowserRouter([
   {
@@ -23,4 +25,12 @@ export const router = createBrowserRouter([
       },
     ],
   },
+  {
+  path: "/dashboard",
+  element: (
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  ),
+}
 ]);
