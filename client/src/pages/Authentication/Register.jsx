@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import useAuth from "../../hook/useAuth";
+import { axiosSecure } from "../../hook/useAxiosSecure";
 
 const Register = () => {
   const { createUser, updateUserProfile } = useAuth();
@@ -21,20 +22,34 @@ const Register = () => {
 
   const password = watch("password", "");
 
-  const onSubmit = async (data) => {
-    const { name, email, password } = data;
-    setRegError("");
+const onSubmit = async (data) => {
+  const { name, email, password } = data;
+  setRegError("");
 
-    try {
-      const result = await createUser(email, password);
-      await updateUserProfile({ displayName: name });
-      console.log("Registered:", result.user);
-      navigate("/");
-    } catch (error) {
-      console.error("Registration error:", error.message);
-      setRegError(error.message);
-    }
-  };
+  try {
+    // 1. Create Firebase user
+    const result = await createUser(email, password);
+    await updateUserProfile({ displayName: name });
+
+    // 2. Prepare user data
+    const userData = {
+      email,
+      displayName: name,
+      role: "user",  // default role
+    };
+
+    // 3. Post user data to backend with axios
+    const response = await axiosSecure.post("/users", userData);
+
+    console.log("User saved in DB:", response.data);
+
+    // 4. Navigate after success
+    navigate("/");
+  } catch (error) {
+    console.error("Registration error:", error.message);
+    setRegError(error.message);
+  }
+};
 
   return (
     <form
