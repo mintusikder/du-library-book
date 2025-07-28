@@ -1,21 +1,50 @@
-import React from "react";
-import { Link } from "react-router";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { useForm } from "react-hook-form";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { toast } from "react-hot-toast";
+import useAuth from "../../hook/useAuth";
 
 const Login = () => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your login logic here
+  const { loginUser } = useAuth();
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  const [loginError, setLoginError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  const onSubmit = async (data) => {
+    const { email, password } = data;
+    setLoginError("");
+
+    try {
+      await loginUser(email, password);
+      toast.success("Login successful!");
+      navigate("/");
+    } catch (error) {
+      setLoginError(error.message || "Failed to login");
+    }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="max-w-md w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white mx-auto mt-10"
     >
       <h1 className="text-gray-900 text-3xl font-medium mt-10">Login</h1>
       <p className="text-gray-500 text-sm mt-2">Please sign in to continue</p>
 
-      <div className="flex items-center w-full mt-10 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+      {/* Email input */}
+      <div
+        className={`flex items-center w-full mt-10 bg-white border h-12 rounded-full overflow-hidden pl-6 gap-2 ${
+          errors.email ? "border-red-500" : "border-gray-300/80"
+        }`}
+      >
         <svg
           width="16"
           height="11"
@@ -34,12 +63,25 @@ const Login = () => {
           type="email"
           placeholder="Email id"
           className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
-          required
-          name="email"
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
+              message: "Enter a valid email address",
+            },
+          })}
         />
       </div>
+      {errors.email && (
+        <p className="text-red-500 text-xs text-left mt-1">{errors.email.message}</p>
+      )}
 
-      <div className="flex items-center mt-4 w-full bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+      {/* Password input with eye toggle */}
+      <div
+        className={`flex items-center mt-4 w-full bg-white border h-12 rounded-full overflow-hidden pl-6 gap-2 pr-4 ${
+          errors.password ? "border-red-500" : "border-gray-300/80"
+        }`}
+      >
         <svg
           width="13"
           height="17"
@@ -53,13 +95,28 @@ const Login = () => {
           />
         </svg>
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Password"
           className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
-          required
-          name="password"
+          {...register("password", {
+            required: "Password is required",
+            minLength: { value: 6, message: "Minimum 6 characters" },
+          })}
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="text-gray-500"
+        >
+          {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+        </button>
       </div>
+      {errors.password && (
+        <p className="text-red-500 text-xs text-left mt-1">{errors.password.message}</p>
+      )}
+
+      {/* Login error */}
+      {loginError && <p className="text-red-600 mt-2">{loginError}</p>}
 
       <div className="mt-5 text-left text-indigo-500">
         <a className="text-sm" href="#">

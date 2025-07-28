@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { toast } from "react-hot-toast";
 import useAuth from "../../hook/useAuth";
 import { axiosSecure } from "../../hook/useAxiosSecure";
 
@@ -22,122 +23,151 @@ const Register = () => {
 
   const password = watch("password", "");
 
-const onSubmit = async (data) => {
-  const { name, email, password } = data;
-  setRegError("");
+  const onSubmit = async (data) => {
+    const { name, email, password } = data;
+    setRegError("");
 
-  try {
-    // 1. Create Firebase user
-    const result = await createUser(email, password);
-    await updateUserProfile({ displayName: name });
+    try {
+      // Create user in Firebase
+      const result = await createUser(email, password);
+      await updateUserProfile({ displayName: name });
 
-    // 2. Prepare user data
-    const userData = {
-      email,
-      displayName: name,
-      role: "user",  // default role
-    };
+      // Post user to MongoDB
+      const userData = {
+        email,
+        displayName: name,
+        role: "user",
+      };
 
-    // 3. Post user data to backend with axios
-    const response = await axiosSecure.post("/users", userData);
+      await axiosSecure.post("/users", userData);
+      toast.success("Registration successful!");
 
-    console.log("User saved in DB:", response.data);
-
-    // 4. Navigate after success
-    navigate("/");
-  } catch (error) {
-    console.error("Registration error:", error.message);
-    setRegError(error.message);
-  }
-};
+      // Navigate
+      navigate("/");
+    } catch (error) {
+      setRegError(error.message);
+    }
+  };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-md w-full mx-auto mt-10 p-8 bg-white rounded-xl shadow-md"
+      className="max-w-md w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white mx-auto mt-10"
     >
-      <h1 className="text-3xl font-bold text-center mb-6">Register</h1>
+      <h1 className="text-gray-900 text-3xl font-medium mt-10">Register</h1>
+      <p className="text-gray-500 text-sm mt-2">Create your account below</p>
 
-      {/* Name */}
-      <label className="block mb-1 font-semibold text-gray-700">Full Name</label>
-      <input
-        type="text"
-        placeholder="Enter your full name"
-        {...register("name", { required: "Name is required" })}
-        className={`input-field ${errors.name ? "border-red-500" : "border-gray-300"}`}
-      />
-      {errors.name && <p className="text-red-500 text-sm mb-3">{errors.name.message}</p>}
+      {/* Full Name */}
+      <div className="mt-8">
+        <input
+          type="text"
+          placeholder="Full Name"
+          {...register("name", { required: "Name is required" })}
+          className={`input w-full h-12 px-6 rounded-full border ${
+            errors.name ? "border-red-500" : "border-gray-300/80"
+          } text-sm text-gray-700`}
+        />
+        {errors.name && (
+          <p className="text-red-500 text-xs text-left mt-1">
+            {errors.name.message}
+          </p>
+        )}
+      </div>
 
       {/* Email */}
-      <label className="block mb-1 font-semibold text-gray-700">Email Address</label>
-      <input
-        type="email"
-        placeholder="Enter your email"
-        {...register("email", { required: "Email is required" })}
-        className={`input-field ${errors.email ? "border-red-500" : "border-gray-300"}`}
-      />
-      {errors.email && <p className="text-red-500 text-sm mb-3">{errors.email.message}</p>}
+      <div className="mt-4">
+        <input
+          type="email"
+          placeholder="Email"
+          {...register("email", { required: "Email is required" })}
+          className={`input w-full h-12 px-6 rounded-full border ${
+            errors.email ? "border-red-500" : "border-gray-300/80"
+          } text-sm text-gray-700`}
+        />
+        {errors.email && (
+          <p className="text-red-500 text-xs text-left mt-1">
+            {errors.email.message}
+          </p>
+        )}
+      </div>
 
       {/* Password */}
-      <label className="block mb-1 font-semibold text-gray-700">Password</label>
-      <div className="relative">
+      <div className="mt-4 relative">
         <input
           type={showPassword ? "text" : "password"}
-          placeholder="Enter your password"
+          placeholder="Password"
           {...register("password", {
             required: "Password is required",
-            minLength: { value: 6, message: "Password must be at least 6 characters" },
+            minLength: { value: 6, message: "Min 6 characters" },
             pattern: {
               value: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
-              message: "Include uppercase, number & special character",
+              message: "Must include uppercase, number, special char",
             },
           })}
-          className={`input-field pr-10 ${errors.password ? "border-red-500" : "border-gray-300"}`}
+          className={`input w-full h-12 px-6 pr-12 rounded-full border ${
+            errors.password ? "border-red-500" : "border-gray-300/80"
+          } text-sm text-gray-700`}
         />
         <button
           type="button"
-          className="absolute right-3 top-2 text-gray-600 hover:text-indigo-600"
-          onClick={() => setShowPassword(!showPassword)}
+          onClick={() => setShowPassword((prev) => !prev)}
+          className="absolute top-3 right-4 text-gray-500"
           tabIndex={-1}
         >
           {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
         </button>
+        {errors.password && (
+          <p className="text-red-500 text-xs text-left mt-1">
+            {errors.password.message}
+          </p>
+        )}
       </div>
-      {errors.password && <p className="text-red-500 text-sm mb-3">{errors.password.message}</p>}
 
       {/* Confirm Password */}
-      <label className="block mb-1 font-semibold text-gray-700">Confirm Password</label>
-      <div className="relative">
+      <div className="mt-4 relative">
         <input
           type={showConfirmPassword ? "text" : "password"}
-          placeholder="Confirm your password"
+          placeholder="Confirm Password"
           {...register("confirmPassword", {
             required: "Confirm password is required",
             validate: (value) => value === password || "Passwords do not match",
           })}
-          className={`input-field pr-10 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"}`}
+          className={`input w-full h-12 px-6 pr-12 rounded-full border ${
+            errors.confirmPassword ? "border-red-500" : "border-gray-300/80"
+          } text-sm text-gray-700`}
         />
         <button
           type="button"
-          className="absolute right-3 top-2 text-gray-600 hover:text-indigo-600"
-          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          onClick={() => setShowConfirmPassword((prev) => !prev)}
+          className="absolute top-3 right-4 text-gray-500"
           tabIndex={-1}
         >
           {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
         </button>
+        {errors.confirmPassword && (
+          <p className="text-red-500 text-xs text-left mt-1">
+            {errors.confirmPassword.message}
+          </p>
+        )}
       </div>
-      {errors.confirmPassword && (
-        <p className="text-red-500 text-sm mb-4">{errors.confirmPassword.message}</p>
-      )}
 
-      {/* Register Button */}
-      {regError && <p className="text-red-600 mb-3">{regError}</p>}
+      {/* Error */}
+      {regError && <p className="text-red-600 text-sm mt-3">{regError}</p>}
+
+      {/* Submit */}
       <button
         type="submit"
-        className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
+        className="mt-6 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity"
       >
         Register
       </button>
+
+      <p className="text-gray-500 text-sm mt-3 mb-11">
+        Already have an account?{" "}
+        <Link to="/login" className="text-indigo-500">
+          Sign in
+        </Link>
+      </p>
     </form>
   );
 };
