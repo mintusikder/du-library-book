@@ -1,72 +1,128 @@
-import React from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router";
+import useAuth from "../../hook/useAuth";
 
 const Register = () => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add your register logic here
+  const { createUser, updateUserProfile } = useAuth();
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+
+  const [regError, setRegError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const password = watch("password", "");
+
+  const onSubmit = async (data) => {
+    const { name, email, password } = data;
+    setRegError("");
+
+    try {
+      const result = await createUser(email, password);
+      await updateUserProfile({ displayName: name });
+      console.log("Registered:", result.user);
+      navigate("/");
+    } catch (error) {
+      console.error("Registration error:", error.message);
+      setRegError(error.message);
+    }
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
-      className="max-w-md w-full text-center border border-gray-300/60 rounded-2xl px-8 bg-white mx-auto mt-10"
+      onSubmit={handleSubmit(onSubmit)}
+      className="max-w-md w-full mx-auto mt-10 p-8 bg-white rounded-xl shadow-md"
     >
-      <h1 className="text-gray-900 text-3xl font-medium mt-10">Register</h1>
-      <p className="text-gray-500 text-sm mt-2">Create your account to get started</p>
+      <h1 className="text-3xl font-bold text-center mb-6">Register</h1>
 
-      <div className="flex items-center w-full mt-10 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+      {/* Name */}
+      <label className="block mb-1 font-semibold text-gray-700">Full Name</label>
+      <input
+        type="text"
+        placeholder="Enter your full name"
+        {...register("name", { required: "Name is required" })}
+        className={`input-field ${errors.name ? "border-red-500" : "border-gray-300"}`}
+      />
+      {errors.name && <p className="text-red-500 text-sm mb-3">{errors.name.message}</p>}
+
+      {/* Email */}
+      <label className="block mb-1 font-semibold text-gray-700">Email Address</label>
+      <input
+        type="email"
+        placeholder="Enter your email"
+        {...register("email", { required: "Email is required" })}
+        className={`input-field ${errors.email ? "border-red-500" : "border-gray-300"}`}
+      />
+      {errors.email && <p className="text-red-500 text-sm mb-3">{errors.email.message}</p>}
+
+      {/* Password */}
+      <label className="block mb-1 font-semibold text-gray-700">Password</label>
+      <div className="relative">
         <input
-          type="text"
-          name="name"
-          placeholder="Full Name"
-          className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
-          required
+          type={showPassword ? "text" : "password"}
+          placeholder="Enter your password"
+          {...register("password", {
+            required: "Password is required",
+            minLength: { value: 6, message: "Password must be at least 6 characters" },
+            pattern: {
+              value: /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])/,
+              message: "Include uppercase, number & special character",
+            },
+          })}
+          className={`input-field pr-10 ${errors.password ? "border-red-500" : "border-gray-300"}`}
         />
+        <button
+          type="button"
+          className="absolute right-3 top-2 text-gray-600 hover:text-indigo-600"
+          onClick={() => setShowPassword(!showPassword)}
+          tabIndex={-1}
+        >
+          {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+        </button>
       </div>
+      {errors.password && <p className="text-red-500 text-sm mb-3">{errors.password.message}</p>}
 
-      <div className="flex items-center w-full mt-4 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
+      {/* Confirm Password */}
+      <label className="block mb-1 font-semibold text-gray-700">Confirm Password</label>
+      <div className="relative">
         <input
-          type="email"
-          name="email"
-          placeholder="Email address"
-          className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
-          required
+          type={showConfirmPassword ? "text" : "password"}
+          placeholder="Confirm your password"
+          {...register("confirmPassword", {
+            required: "Confirm password is required",
+            validate: (value) => value === password || "Passwords do not match",
+          })}
+          className={`input-field pr-10 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"}`}
         />
+        <button
+          type="button"
+          className="absolute right-3 top-2 text-gray-600 hover:text-indigo-600"
+          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          tabIndex={-1}
+        >
+          {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+        </button>
       </div>
+      {errors.confirmPassword && (
+        <p className="text-red-500 text-sm mb-4">{errors.confirmPassword.message}</p>
+      )}
 
-      <div className="flex items-center w-full mt-4 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
-          required
-        />
-      </div>
-
-      <div className="flex items-center w-full mt-4 bg-white border border-gray-300/80 h-12 rounded-full overflow-hidden pl-6 gap-2">
-        <input
-          type="password"
-          name="confirmPassword"
-          placeholder="Confirm Password"
-          className="bg-transparent text-gray-500 placeholder-gray-500 outline-none text-sm w-full h-full"
-          required
-        />
-      </div>
-
+      {/* Register Button */}
+      {regError && <p className="text-red-600 mb-3">{regError}</p>}
       <button
         type="submit"
-        className="mt-6 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity"
+        className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition"
       >
         Register
       </button>
-
-      <p className="text-gray-500 text-sm mt-3 mb-11">
-        Already have an account?{" "}
-        <a className="text-indigo-500" href="#">
-          Login
-        </a>
-      </p>
     </form>
   );
 };
