@@ -112,6 +112,19 @@ async function startServer() {
         res.status(500).json({ message: "Internal server error" });
       }
     });
+   
+// ✅ Add a book
+app.post("/books", async (req, res) => {
+  const newBook = req.body;
+
+  try {
+    const result = await booksCollection.insertOne(newBook);
+    res.status(201).json({ insertedId: result.insertedId });
+  } catch (error) {
+    console.error("Failed to add book:", error);
+    res.status(500).json({ error: "Failed to add book" });
+  }
+});
 
     // ✅ Start the server
     app.listen(port, () => {
