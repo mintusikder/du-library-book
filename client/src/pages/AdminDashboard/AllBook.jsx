@@ -13,6 +13,8 @@ const AllBook = () => {
   const [bookToDelete, setBookToDelete] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
   const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [updatedBook, setUpdatedBook] = useState({});
 
   const itemsPerPage = 10;
 
@@ -30,7 +32,6 @@ const AllBook = () => {
       });
   }, []);
 
-  // View book
   const handleView = (id) => {
     const book = books.find((b) => b._id === id);
     setSelectedBook(book);
@@ -42,20 +43,22 @@ const AllBook = () => {
     setViewModalOpen(false);
   };
 
-  // Delete modal from inside view
   const openDeleteFromView = (id) => {
     setBookToDelete(id);
     setDeleteModalOpen(true);
     setViewModalOpen(false);
   };
 
-  // Delete modal from table
   const openDeleteModal = (id) => {
     setBookToDelete(id);
     setDeleteModalOpen(true);
   };
 
-  // Confirm delete
+  const cancelDelete = () => {
+    setDeleteModalOpen(false);
+    setBookToDelete(null);
+  };
+
   const confirmDelete = async () => {
     if (!bookToDelete) return;
     try {
@@ -71,25 +74,38 @@ const AllBook = () => {
     }
   };
 
-  // Cancel delete
-  const cancelDelete = () => {
-    setDeleteModalOpen(false);
-    setBookToDelete(null);
-  };
-
-  // Update logic placeholder
   const handleUpdate = (id) => {
-    console.log("Update book:", id);
-    // Add your update logic or navigation here
+    const book = books.find((b) => b._id === id);
+    setSelectedBook(book);
+    setUpdatedBook(book);
+    setUpdateModalOpen(true);
   };
 
-  // Placeholder for handleBorrowed
+  const handleUpdateChange = (e) => {
+    const { name, value } = e.target;
+    setUpdatedBook((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const submitUpdate = async () => {
+    try {
+      await axiosSecure.patch(`/books/${updatedBook._id}`, updatedBook);
+      setBooks((prev) =>
+        prev.map((b) => (b._id === updatedBook._id ? updatedBook : b))
+      );
+      toast.success("Book updated successfully");
+      setUpdateModalOpen(false);
+      setSelectedBook(null);
+    } catch (error) {
+      console.error("Update failed", error);
+      toast.error("Failed to update book");
+    }
+  };
+
   const handleBorrowed = (id) => {
     console.log("Borrowed Book ID:", id);
     toast.success("Borrowed logic not implemented");
   };
 
-  // Filtered + paginated
   const filteredBooks = books.filter((book) =>
     book.book_title.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -104,7 +120,6 @@ const AllBook = () => {
     <div className="p-5 relative">
       <h2 className="text-2xl font-semibold mb-4">All Books</h2>
 
-      {/* Search */}
       <div className="mb-4">
         <input
           type="text"
@@ -118,7 +133,6 @@ const AllBook = () => {
         />
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto">
         <table className="table w-full">
           <thead className="bg-gray-100">
@@ -157,7 +171,6 @@ const AllBook = () => {
         </table>
       </div>
 
-      {/* Pagination */}
       <div className="flex justify-center gap-4 mt-6">
         <button
           className="btn"
@@ -179,21 +192,18 @@ const AllBook = () => {
       {viewModalOpen && selectedBook && (
         <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl relative">
-            <h3 className="text-xl font-bold mb-4 text-center">
-              Book Details
-            </h3>
+            <h3 className="text-xl font-bold mb-4 text-center">Book Details</h3>
             <div className="text-left space-y-2 text-sm">
-              <p><strong>Title:</strong> {selectedBook.book_title}</p>
-              <p><strong>Author:</strong> {selectedBook.author}</p>
-              <p><strong>Publisher:</strong> {selectedBook.publisher}</p>
-              <p><strong>Category:</strong> {selectedBook.category}</p>
-              <p><strong>Volume:</strong> {selectedBook.volume}</p>
-              <p><strong>ISBN:</strong> {selectedBook.isbn}</p>
-              <p><strong>Price:</strong> {selectedBook.price}</p>
-              <p><strong>Purchase Method:</strong> {selectedBook.purchase_method}</p>
-              <p><strong>Year:</strong> {selectedBook.year}</p>
+              {Object.entries(selectedBook).map(
+                ([key, val]) =>
+                  key !== "_id" && (
+                    <p key={key}>
+                      <strong>{key.replace("_", " ").toUpperCase()}:</strong>{" "}
+                      {val}
+                    </p>
+                  )
+              )}
             </div>
-
             <div className="flex justify-end gap-2 mt-6">
               <button
                 className="btn btn-sm bg-blue-500 text-white hover:bg-blue-600"
@@ -218,9 +228,55 @@ const AllBook = () => {
         </div>
       )}
 
-      {/* Delete Modal */}
+      {/* Update Modal */}
+      {updateModalOpen && updatedBook && (
+        <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl relative">
+            <h3 className="text-xl font-bold mb-4 text-center">Update Book</h3>
+            <form className="space-y-3">
+              {[
+                "book_title",
+                "author",
+                "publisher",
+                "category",
+                "volume",
+                "isbn",
+                "price",
+                "purchase_method",
+                "year",
+              ].map((field) => (
+                <input
+                  key={field}
+                  type="text"
+                  name={field}
+                  value={updatedBook[field] || ""}
+                  onChange={handleUpdateChange}
+                  placeholder={field.replace("_", " ")}
+                  className="input input-bordered w-full"
+                />
+              ))}
+            </form>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setUpdateModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-sm btn-success text-white"
+                onClick={submitUpdate}
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0  bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
             <h3 className="text-lg font-semibold mb-4">
               Are you sure you want to delete this book?
