@@ -127,12 +127,46 @@ async function startServer() {
       }
     });
 
+    //update book
+    app.patch("/books/:id", async (req, res) => {
+      const { id } = req.params;
+      const updateData = { ...req.body };
+
+      if (!ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid book ID format" });
+      }
+
+      // Remove _id if present in updateData to avoid error
+      if (updateData._id) delete updateData._id;
+
+      try {
+        const result = await booksCollection.updateOne(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
+        );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ error: "Book not found" });
+        }
+
+        res.status(200).json({
+          message: "Book updated successfully",
+          modifiedCount: result.modifiedCount,
+        });
+      } catch (error) {
+        console.error("Error updating book:", error);
+        res.status(500).json({ error: "Failed to update book" });
+      }
+    });
+
     // Delete Book
     app.delete("/books/:id", async (req, res) => {
       const { id } = req.params;
 
       try {
-        const result = await booksCollection.deleteOne({ _id: new ObjectId(id) });
+        const result = await booksCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
 
         if (result.deletedCount === 1) {
           res.json({ success: true });
@@ -144,7 +178,6 @@ async function startServer() {
         res.status(500).json({ error: "Internal server error" });
       }
     });
-
 
     // ✅ Start the server
     app.listen(port, () => {
