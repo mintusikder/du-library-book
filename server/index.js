@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
 require("dotenv").config();
-
+const { ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -112,19 +112,39 @@ async function startServer() {
         res.status(500).json({ message: "Internal server error" });
       }
     });
-   
-// ✅ Add a book
-app.post("/books", async (req, res) => {
-  const newBook = req.body;
 
-  try {
-    const result = await booksCollection.insertOne(newBook);
-    res.status(201).json({ insertedId: result.insertedId });
-  } catch (error) {
-    console.error("Failed to add book:", error);
-    res.status(500).json({ error: "Failed to add book" });
-  }
-});
+    // ✅ Add a book
+
+    app.post("/books", async (req, res) => {
+      const newBook = req.body;
+
+      try {
+        const result = await booksCollection.insertOne(newBook);
+        res.status(201).json({ insertedId: result.insertedId });
+      } catch (error) {
+        console.error("Failed to add book:", error);
+        res.status(500).json({ error: "Failed to add book" });
+      }
+    });
+
+    // Delete Book
+    app.delete("/books/:id", async (req, res) => {
+      const { id } = req.params;
+
+      try {
+        const result = await booksCollection.deleteOne({ _id: new ObjectId(id) });
+
+        if (result.deletedCount === 1) {
+          res.json({ success: true });
+        } else {
+          res.status(404).json({ error: "Book not found" });
+        }
+      } catch (error) {
+        console.error("Error deleting book:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    });
+
 
     // ✅ Start the server
     app.listen(port, () => {
