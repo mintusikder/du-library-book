@@ -35,7 +35,7 @@ const AddBook = () => {
   return (
     <div className="p-6 md:p-12 bg-[#f4f3f0] min-h-screen">
       <Toaster position="top-center" reverseOrder={false} />
-      <h2 className="text-3xl font-bold text-center mb-8">📚 Add New Book</h2>
+      <h2 className="text-3xl font-bold text-center mb-8">Add New Book</h2>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
@@ -92,7 +92,9 @@ const AddBook = () => {
         <button
           type="submit"
           className={`md:col-span-2 py-3 rounded-lg font-semibold text-white transition-all ${
-            isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            isLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gray-600 hover:bg-gray-700"
           }`}
           disabled={isLoading}
         >
