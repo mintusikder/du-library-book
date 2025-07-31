@@ -1,8 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
-const { ObjectId } = require("mongodb");
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -10,8 +10,8 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// MongoDB URI and client setup
 const uri = process.env.MONGODB_URI;
-
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -28,15 +28,14 @@ async function startServer() {
     const db = client.db("duLibraryBook");
     const booksCollection = db.collection("books");
     const usersCollection = db.collection("users");
+    const borrowedBooksCollection = db.collection("borrowedBooks");
 
-    // ✅ Create new user
+    // Create new user
     app.post("/users", async (req, res) => {
       const { email, displayName, role = "user" } = req.body;
 
       if (!email || !displayName) {
-        return res
-          .status(400)
-          .json({ message: "Email and DisplayName are required" });
+        return res.status(400).json({ message: "Email and DisplayName are required" });
       }
 
       try {
@@ -60,23 +59,26 @@ async function startServer() {
       }
     });
 
-    // ✅ Get user role by email
+    // Get user role by email
     app.get("/users/role/:email", async (req, res) => {
       const email = req.params.email;
 
       try {
         const user = await usersCollection.findOne({ email });
-        res.status(200).send({ role: user?.role || "user" });
+        res.status(200).json({ role: user?.role || "user" });
       } catch (error) {
         console.error("Error fetching role:", error);
         res.status(500).json({ message: "Internal server error" });
       }
     });
 
-    // ✅ Middleware for admin verification (placeholder)
+    // Middleware for admin verification (placeholder)
     const verifyAdmin = async (req, res, next) => {
-      // You can enhance this using JWT/Firebase Admin Auth
       const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required for admin check" });
+      }
+
       const user = await usersCollection.findOne({ email });
 
       if (user?.role === "admin") {
@@ -86,9 +88,13 @@ async function startServer() {
       }
     };
 
-    // ✅ Update user role (Admin only)
+    // Update user role (Admin only)
     app.patch("/role", verifyAdmin, async (req, res) => {
       const { email, role } = req.body;
+
+      if (!email || !role) {
+        return res.status(400).json({ message: "Email and role are required" });
+      }
 
       try {
         const result = await usersCollection.updateOne(
@@ -102,7 +108,7 @@ async function startServer() {
       }
     });
 
-    // ✅ Get all books
+    // Get all books
     app.get("/books", async (req, res) => {
       try {
         const bookData = await booksCollection.find().toArray();
@@ -113,8 +119,7 @@ async function startServer() {
       }
     });
 
-    // ✅ Add a book
-
+    // Add a book
     app.post("/books", async (req, res) => {
       const newBook = req.body;
 
@@ -127,7 +132,7 @@ async function startServer() {
       }
     });
 
-    //update book
+    // Update book
     app.patch("/books/:id", async (req, res) => {
       const { id } = req.params;
       const updateData = { ...req.body };
@@ -136,7 +141,6 @@ async function startServer() {
         return res.status(400).json({ error: "Invalid book ID format" });
       }
 
-      // Remove _id if present in updateData to avoid error
       if (updateData._id) delete updateData._id;
 
       try {
@@ -159,27 +163,86 @@ async function startServer() {
       }
     });
 
-    // Delete Book
-    app.delete("/books/:id", async (req, res) => {
-      const { id } = req.params;
+    // Borrow a book
+    app.post("/borrowedBooks", async (req, res) => {
+      const { name, phone, role, quantity, bookId, book_title, author, publisher } = req.body;
+
+      if (!name || !phone || !role || !bookId || !quantity) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      if (!ObjectId.isValid(bookId)) {
+        return res.status(400).json({ error: "Invalid book ID" });
+      }
 
       try {
-        const result = await booksCollection.deleteOne({
-          _id: new ObjectId(id),
-        });
-
-        if (result.deletedCount === 1) {
-          res.json({ success: true });
-        } else {
-          res.status(404).json({ error: "Book not found" });
+        const book = await booksCollection.findOne({ _id: new ObjectId(bookId) });
+        if (!book) {
+          return res.status(404).json({ error: "Book not found" });
         }
+
+        if (book.quantity < quantity) {
+          return res.status(400).json({ error: "Not enough stock available" });
+        }
+
+        const borrowRecord = {
+          name,
+          phone,
+          role,
+          quantity,
+          bookId: new ObjectId(bookId),
+          book_title,
+          author,
+          publisher,
+          borrowedAt: new Date(),
+        };
+
+        const insertResult = await borrowedBooksCollection.insertOne(borrowRecord);
+        await booksCollection.updateOne(
+          { _id: new ObjectId(bookId) },
+          { $inc: { quantity: -Number(quantity) } }
+        );
+
+        res.status(201).json({
+          message: "Borrow record created and book stock updated",
+          borrowId: insertResult.insertedId,
+        });
       } catch (error) {
-        console.error("Error deleting book:", error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error("Borrow record creation failed:", error);
+        res.status(500).json({ error: "Server error" });
       }
     });
 
-    // ✅ Start the server
+    // Get all borrowed books
+app.get("/borrowedBooks", async (req, res) => {
+  try {
+    const data = await borrowedBooksCollection.find().toArray();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching borrowedBooks:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+  
+// Return book (delete borrowed entry)
+app.delete("/borrowedBooks/:id", async (req, res) => {
+  const { id } = req.params;
+  if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
+
+  try {
+    const result = await borrowedBooksCollection.deleteOne({ _id: new ObjectId(id) });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Borrowed record not found" });
+    }
+    res.status(200).json({ message: "Returned successfully" });
+  } catch (error) {
+    console.error("Error returning book:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+    // Start server
     app.listen(port, () => {
       console.log(`🚀 Server running on http://localhost:${port}`);
     });
