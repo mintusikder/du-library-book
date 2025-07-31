@@ -34,7 +34,7 @@ const Navbar = () => {
               className="flex items-center gap-2 text-sm font-medium"
             >
               <img
-                src={user?.photoURL || "https://i.ibb.co/yYr1mMF/user.png"}
+                src={user?.photoURL || "https://i.ibb.co/M5B9HYT0/profile.png"}
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full object-cover"
               />
