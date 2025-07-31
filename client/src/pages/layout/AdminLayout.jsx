@@ -16,6 +16,7 @@ const AdminLayout = () => {
           <NavLink to="/dashboard/home" className="block hover:text-indigo-200">Dashboard Home</NavLink>
           <NavLink to="/dashboard/add-book" className="block hover:text-indigo-200">Add Book</NavLink>
           <NavLink to="/dashboard/all-book" className="block hover:text-indigo-200">All Books</NavLink>
+          <NavLink to="/dashboard/borrowed-book" className="block hover:text-indigo-200">Borrowed Books</NavLink>
         </nav>
       </aside>
 
