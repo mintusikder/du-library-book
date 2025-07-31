@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
 import { axiosSecure } from "../../hook/useAxiosSecure";
 import Loading from "../Shared/Loading";
 import toast from "react-hot-toast";
@@ -125,9 +126,12 @@ const AllBook = () => {
     }
   };
 
-  const filteredBooks = books.filter((book) =>
-    book.book_title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+ const filteredBooks = books.filter((book) =>
+  `${book.book_title} ${book.author} ${book.publisher}`
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase())
+);
+
 
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
@@ -159,7 +163,7 @@ const AllBook = () => {
               <th>#</th>
               <th>Book Title</th>
               <th>Author</th>
-              <th>Volume</th>
+         <th>Publisher</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -169,7 +173,7 @@ const AllBook = () => {
                 <td>{startIdx + index + 1}</td>
                 <td>{book.book_title}</td>
                 <td>{book.author}</td>
-                <td>{book.volume}</td>
+               <td>{book.publisher}</td>
                 <td className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleView(book._id)}
@@ -181,7 +185,7 @@ const AllBook = () => {
                     onClick={() => handleBorrowed(book._id)}
                     className="btn btn-sm bg-yellow-500 text-white hover:bg-yellow-600"
                   >
-                    Borrowed Book
+                    Borrow
                   </button>
                 </td>
               </tr>
@@ -214,7 +218,100 @@ const AllBook = () => {
         </button>
       </div>
 
-      {/* View, Update, Delete Modals below here (not repeated for brevity) */}
+      {viewModalOpen && selectedBook && (
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl relative">
+            <h3 className="text-xl font-bold mb-4 text-center">Book Details</h3>
+            <div className="text-left space-y-2 text-sm">
+              {Object.entries(selectedBook).map(
+                ([key, val]) =>
+                  key !== "_id" && (
+                    <p key={key}>
+                      <strong>{key.replace("_", " ").toUpperCase()}:</strong> {val}
+                    </p>
+                  )
+              )}
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button
+                className="btn btn-sm bg-blue-500 text-white hover:bg-blue-600"
+                onClick={() => handleUpdate(selectedBook._id)}
+              >
+                Update
+              </button>
+              <button
+                className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
+                onClick={() => openDeleteFromView(selectedBook._id)}
+              >
+                Delete
+              </button>
+              <button className="btn btn-sm btn-outline" onClick={closeViewModal}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {updateModalOpen && updatedBook && (
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl relative">
+            <h3 className="text-xl font-bold mb-4 text-center">Update Book</h3>
+            <form className="space-y-3">
+              {[
+                "book_title",
+                "author",
+                "publisher",
+                "category",
+                "volume",
+                "isbn",
+                "price",
+                "purchase_method",
+                "year",
+              ].map((field) => (
+                <input
+                  key={field}
+                  type="text"
+                  name={field}
+                  value={updatedBook[field] || ""}
+                  onChange={handleUpdateChange}
+                  placeholder={field.replace("_", " ")}
+                  className="input input-bordered w-full"
+                />
+              ))}
+            </form>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                className="btn btn-sm btn-outline"
+                onClick={() => setUpdateModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-sm btn-success text-white" onClick={submitUpdate}>
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">
+            <h3 className="text-lg font-semibold mb-4">
+              Are you sure you want to delete this book?
+            </h3>
+            <div className="flex justify-center gap-4">
+              <button onClick={cancelDelete} className="btn btn-outline px-4 py-2">
+                Cancel
+              </button>
+              <button onClick={confirmDelete} className="btn btn-error px-4 py-2 text-white">
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
