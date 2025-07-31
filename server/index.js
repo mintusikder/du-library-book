@@ -35,7 +35,9 @@ async function startServer() {
       const { email, displayName, role = "user" } = req.body;
 
       if (!email || !displayName) {
-        return res.status(400).json({ message: "Email and DisplayName are required" });
+        return res
+          .status(400)
+          .json({ message: "Email and DisplayName are required" });
       }
 
       try {
@@ -76,7 +78,9 @@ async function startServer() {
     const verifyAdmin = async (req, res, next) => {
       const { email } = req.body;
       if (!email) {
-        return res.status(400).json({ message: "Email is required for admin check" });
+        return res
+          .status(400)
+          .json({ message: "Email is required for admin check" });
       }
 
       const user = await usersCollection.findOne({ email });
@@ -165,82 +169,81 @@ async function startServer() {
 
     // Borrow a book
     app.post("/borrowedBooks", async (req, res) => {
-      const { name, phone, role, quantity, bookId, book_title, author, publisher } = req.body;
+      const { name, phone, role, book_title, author, publisher } = req.body;
 
-      if (!name || !phone || !role || !bookId || !quantity) {
+      if (!name || !phone || !role || !book_title || !author || !publisher) {
         return res.status(400).json({ error: "Missing required fields" });
       }
 
-      if (!ObjectId.isValid(bookId)) {
-        return res.status(400).json({ error: "Invalid book ID" });
-      }
-
       try {
-        const book = await booksCollection.findOne({ _id: new ObjectId(bookId) });
+        const book = await booksCollection.findOne({
+          book_title,
+          author,
+          publisher,
+        });
+
         if (!book) {
           return res.status(404).json({ error: "Book not found" });
         }
 
-        if (book.quantity < quantity) {
-          return res.status(400).json({ error: "Not enough stock available" });
+        if (book.quantity < 1) {
+          return res.status(400).json({ error: "No copies available" });
         }
 
         const borrowRecord = {
           name,
           phone,
           role,
-          quantity,
-          bookId: new ObjectId(bookId),
           book_title,
           author,
           publisher,
           borrowedAt: new Date(),
         };
 
-        const insertResult = await borrowedBooksCollection.insertOne(borrowRecord);
-        await booksCollection.updateOne(
-          { _id: new ObjectId(bookId) },
-          { $inc: { quantity: -Number(quantity) } }
+        const insertResult = await borrowedBooksCollection.insertOne(
+          borrowRecord
         );
 
         res.status(201).json({
-          message: "Borrow record created and book stock updated",
+          message: "Borrow successful",
           borrowId: insertResult.insertedId,
         });
       } catch (error) {
-        console.error("Borrow record creation failed:", error);
+        console.error("Borrow failed:", error);
         res.status(500).json({ error: "Server error" });
       }
     });
 
     // Get all borrowed books
-app.get("/borrowedBooks", async (req, res) => {
-  try {
-    const data = await borrowedBooksCollection.find().toArray();
-    res.status(200).json(data);
-  } catch (error) {
-    console.error("Error fetching borrowedBooks:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+    app.get("/borrowedBooks", async (req, res) => {
+      try {
+        const data = await borrowedBooksCollection.find().toArray();
+        res.status(200).json(data);
+      } catch (error) {
+        console.error("Error fetching borrowedBooks:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
 
-  
-// Return book (delete borrowed entry)
-app.delete("/borrowedBooks/:id", async (req, res) => {
-  const { id } = req.params;
-  if (!ObjectId.isValid(id)) return res.status(400).json({ error: "Invalid ID" });
+    // Return book (delete borrowed entry)
+    app.delete("/borrowedBooks/:id", async (req, res) => {
+      const { id } = req.params;
+      if (!ObjectId.isValid(id))
+        return res.status(400).json({ error: "Invalid ID" });
 
-  try {
-    const result = await borrowedBooksCollection.deleteOne({ _id: new ObjectId(id) });
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Borrowed record not found" });
-    }
-    res.status(200).json({ message: "Returned successfully" });
-  } catch (error) {
-    console.error("Error returning book:", error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
+      try {
+        const result = await borrowedBooksCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ message: "Borrowed record not found" });
+        }
+        res.status(200).json({ message: "Returned successfully" });
+      } catch (error) {
+        console.error("Error returning book:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    });
 
     // Start server
     app.listen(port, () => {
