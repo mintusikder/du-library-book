@@ -46,7 +46,7 @@ const Navbar = () => {
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md py-2 z-50">
                 {role === "admin" && (
                   <Link
-                    to="/dashboard"
+                    to="/dashboard/home"
                     className="block px-4 py-2 hover:bg-gray-100"
                     onClick={() => setDropdownOpen(false)}
                   >
