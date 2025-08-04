@@ -2,5 +2,5 @@
 import axios from "axios";
 
 export const axiosSecure = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://du-library-server.vercel.app",
 });
