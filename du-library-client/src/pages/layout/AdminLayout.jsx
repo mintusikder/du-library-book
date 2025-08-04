@@ -1,4 +1,5 @@
-import { useState } from "react";
+import React, { useState } from "react";
+
 import { Link, NavLink, Outlet } from "react-router";
 import {
   FaHome,
@@ -6,7 +7,7 @@ import {
   FaList,
   FaBookReader,
   FaBars,
-  FaTimes
+  FaTimes,
 } from "react-icons/fa";
 import useRole from "../../hook/useRole";
 import useAuth from "../../hook/useAuth";
@@ -22,7 +23,7 @@ const AdminLayout = () => {
     <>
       <Link
         to="/"
-        className="flex items-center gap-2 hover:text-indigo-200"
+        className="flex items-center gap-2 hover:text-indigo-200 transition duration-200"
         onClick={() => setSidebarOpen(false)}
       >
         <FaHome />
@@ -32,7 +33,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/home"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 ${
+          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -45,7 +46,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/add-book"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 ${
+          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -58,7 +59,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/all-book"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 ${
+          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -71,7 +72,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/borrowed-book"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 ${
+          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -117,36 +118,66 @@ const AdminLayout = () => {
           <nav className="space-y-3">{navLinks}</nav>
         </aside>
 
-        {/* Mobile Sidebar */}
-        {sidebarOpen && (
-          <>
-            {/* Overlay */}
-            <div
-              className="fixed inset-0 bg-black bg-opacity-40 z-40"
-              onClick={() => setSidebarOpen(false)}
-            ></div>
+        {/* Mobile Sidebar with Animation */}
+        <div
+          className={`fixed inset-0 z-40 md:hidden transition-all duration-300 ease-in-out ${
+            sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
+        >
+          {/* Overlay */}
+          <div
+            className="absolute inset-0  bg-opacity-40 transition-opacity duration-300"
+            onClick={() => setSidebarOpen(false)}
+          ></div>
 
-            {/* Sidebar Drawer */}
-            <div className="fixed top-0 left-0 w-64 h-full bg-gray-600 text-white p-6 space-y-6 z-50 transform transition-transform duration-300 translate-x-0">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold">Menu</h2>
-                <button
-                  className="text-white text-lg"
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <FaTimes />
-                </button>
-              </div>
-              <nav className="space-y-3">{navLinks}</nav>
+          {/* Sidebar Drawer */}
+          <div
+            className={`absolute top-0 left-0 w-64 h-full bg-gray-600 text-white p-6 space-y-6 transform transition-transform duration-300 ease-in-out ${
+              sidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold">Menu</h2>
+              <button
+                className="text-white text-lg"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <FaTimes />
+              </button>
             </div>
-          </>
-        )}
+
+            {/* Animated Nav Links */}
+            <nav className="space-y-3">
+              {React.Children.map(navLinks.props.children, (link, i) => (
+                <div
+                  style={{
+                    animation: sidebarOpen
+                      ? `fadeIn 0.3s ease ${i * 0.05 + 0.1}s forwards`
+                      : "none",
+                    opacity: 0,
+                  }}
+                  className="animate-fade"
+                >
+                  {link}
+                </div>
+              ))}
+            </nav>
+          </div>
+        </div>
 
         {/* Main Content */}
         <main className="flex-1 p-6 bg-gray-50">
           <Outlet />
         </main>
       </div>
+
+      {/* Fade-in animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateX(-10px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { Link } from "react-router"; 
 import useAuth from "../../hook/useAuth";
 import useRole from "../../hook/useRole";
 
@@ -105,7 +105,7 @@ const Navbar = () => {
 
       {/* Sidebar Overlay */}
       {open && (
-        <div className="fixed inset-0  bg-opacity-40 z-40 transition-opacity"></div>
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-40 transition-opacity"></div>
       )}
 
       {/* Sidebar */}
