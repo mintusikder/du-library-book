@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { axiosSecure } from "../../hook/useAxiosSecure";
 import Loading from "../Shared/Loading";
 
-// Updated to use axiosSecure
 const fetchBooks = async () => {
   const res = await axiosSecure.get("/books");
   return res.data;
@@ -22,23 +21,18 @@ const AllBooks = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  const rowsPerPage = 8; // cards per page
 
   const filteredBooks = useMemo(() => {
     if (!searchTerm) return books;
     const term = searchTerm.toLowerCase();
-    return books.filter((book) => {
-      return (
-        (typeof book.book_title === "string" &&
-          book.book_title.toLowerCase().includes(term)) ||
-        (typeof book.author === "string" &&
-          book.author.toLowerCase().includes(term)) ||
-        (typeof book.publisher === "string" &&
-          book.publisher.toLowerCase().includes(term)) ||
-        (typeof book.category === "string" &&
-          book.category.toLowerCase().includes(term))
-      );
-    });
+    return books.filter((book) =>
+      ["book_title", "author", "publisher", "category"].some(
+        (key) =>
+          typeof book[key] === "string" &&
+          book[key].toLowerCase().includes(term)
+      )
+    );
   }, [books, searchTerm]);
 
   const totalPages = Math.ceil(filteredBooks.length / rowsPerPage);
@@ -54,75 +48,86 @@ const AllBooks = () => {
   };
 
   return (
-    <div className="p-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">All Books</h1>
 
       <input
         type="text"
         placeholder="Search by Title, Author, Publisher or Category"
-        className="input input-bordered w-full max-w-md mb-4"
+        className="input input-bordered w-full max-w-md mb-6"
         value={searchTerm}
         onChange={handleSearchChange}
       />
 
       {isLoading ? (
-        <Loading></Loading>
+        <Loading />
       ) : isError ? (
         <p className="text-red-500">Error: {error.message}</p>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="table w-full">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Book Title</th>
-                  <th>Author</th>
-                  <th>Publisher</th>
-                  <th>Category</th>
-                  <th>Volume</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedBooks.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="text-center py-4 text-gray-500">
-                      No books found.
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedBooks.map((book, index) => (
-                    <tr key={book._id} className="hover:bg-base-200">
-                      <td>{(currentPage - 1) * rowsPerPage + index + 1}</td>
-                      <td>{book.book_title}</td>
-                      <td>{book.author}</td>
-                      <td>{book.publisher}</td>
-                      <td>{book.category}</td>
-                      <td>{book.volume}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          {paginatedBooks.length === 0 ? (
+            <p className="text-center text-gray-500">No books found.</p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {paginatedBooks.map((book, index) => (
+                <div
+                  key={book._id}
+                  className="bg-base-200 shadow-lg rounded-lg p-4 hover:shadow-xl transition"
+                >
+                  <h2 className="font-bold text-lg mb-2">{book.book_title}</h2>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Author:</span> {book.author}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Publisher:</span>{" "}
+                    {book.publisher}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Category:</span>{" "}
+                    {book.category}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Volume:</span> {book.volume}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">ISBN:</span> {book.isbn}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Price:</span> {book.price}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Purchase Method:</span>{" "}
+                    {book.purchase_method}
+                  </p>
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Year:</span> {book.year}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
 
-          {/* Pagination Controls */}
-          <div className="flex justify-center gap-4 mt-6">
-            <button
-              className="btn"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            >
-              « Previous
-            </button>
-            <button
-              className="btn"
-              disabled={currentPage === totalPages || totalPages === 0}
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            >
-              Next »
-            </button>
-          </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center gap-4 mt-6">
+              <button
+                className="btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              >
+                « Previous
+              </button>
+              <button
+                className="btn"
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
+              >
+                Next »
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
