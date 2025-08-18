@@ -118,7 +118,7 @@ const Login = () => {
       {/* Login error */}
       {loginError && <p className="text-red-600 mt-2">{loginError}</p>}
 
-      <div className="mt-5 text-left text-indigo-500">
+      <div className="mt-5 text-left text-black">
         <a className="text-sm" href="#">
           Forgot password?
         </a>
@@ -126,14 +126,14 @@ const Login = () => {
 
       <button
         type="submit"
-        className="mt-2 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity"
+        className="mt-2 w-full h-11 rounded-full text-white bg-black hover:opacity-90 transition-opacity"
       >
         Login
       </button>
 
       <p className="text-gray-500 text-sm mt-3 mb-11">
         Don’t have an account?{" "}
-        <Link to={"/register"} className="text-indigo-500">
+        <Link to={"/register"} className="text-black">
           Sign up
         </Link>
       </p>

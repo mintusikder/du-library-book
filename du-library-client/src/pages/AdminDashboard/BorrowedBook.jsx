@@ -138,7 +138,7 @@ const applyFilters = () => {
                   <td>
                     <button
                       onClick={() => openReturnModal(item)}
-                      className="btn btn-sm btn-error text-white"
+                      className="btn btn-sm bg-black text-white"
                     >
                       Return
                     </button>

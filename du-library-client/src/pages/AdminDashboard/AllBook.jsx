@@ -177,13 +177,13 @@ const AllBook = () => {
                 <td className="flex flex-wrap gap-2">
                   <button
                     onClick={() => handleView(book._id)}
-                    className="btn btn-sm bg-green-500 text-white hover:bg-green-600"
+                    className="btn btn-sm bg-black text-white "
                   >
                     View
                   </button>
                   <button
                     onClick={() => handleBorrowed(book._id)}
-                    className="btn btn-sm bg-yellow-500 text-white hover:bg-yellow-600"
+                    className="btn btn-sm bg-black text-white "
                   >
                     Borrow
                   </button>
@@ -234,13 +234,13 @@ const AllBook = () => {
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <button
-                className="btn btn-sm bg-blue-500 text-white hover:bg-blue-600"
+                className="btn btn-sm bg-black text-white "
                 onClick={() => handleUpdate(selectedBook._id)}
               >
                 Update
               </button>
               <button
-                className="btn btn-sm bg-red-500 text-white hover:bg-red-600"
+                className="btn btn-sm bg-black text-white "
                 onClick={() => openDeleteFromView(selectedBook._id)}
               >
                 Delete

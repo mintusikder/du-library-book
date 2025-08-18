@@ -87,7 +87,7 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navbar */}
-      <header className="bg-gray-700 text-white flex items-center justify-between px-4 py-3">
+      <header className="bg-black text-white flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           {/* Mobile menu button */}
           <button
@@ -114,7 +114,7 @@ const AdminLayout = () => {
 
       <div className="flex flex-1">
         {/* Desktop Sidebar */}
-        <aside className="w-64 bg-gray-600 text-white p-6 space-y-6 hidden md:block">
+        <aside className="w-64 bg-white  text-black p-6 space-y-6 hidden md:block">
           <nav className="space-y-3">{navLinks}</nav>
         </aside>
 

@@ -157,14 +157,14 @@ const Register = () => {
       {/* Submit */}
       <button
         type="submit"
-        className="mt-6 w-full h-11 rounded-full text-white bg-indigo-500 hover:opacity-90 transition-opacity"
+        className="mt-6 w-full h-11 rounded-full text-white bg-black hover:opacity-90 transition-opacity"
       >
         Register
       </button>
 
       <p className="text-gray-500 text-sm mt-3 mb-11">
         Already have an account?{" "}
-        <Link to="/login" className="text-indigo-500">
+        <Link to="/login" className="text-black">
           Sign in
         </Link>
       </p>

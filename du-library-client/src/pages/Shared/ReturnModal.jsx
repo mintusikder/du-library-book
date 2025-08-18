@@ -16,7 +16,7 @@ const ReturnModal = ({ isOpen, onClose, onConfirm, bookTitle }) => {
           <button onClick={onClose} className="btn btn-outline btn-sm">
             Cancel
           </button>
-          <button onClick={onConfirm} className="btn btn-error btn-sm text-white">
+          <button onClick={onConfirm} className="btn bg-black btn-sm text-white">
             Confirm
           </button>
         </div>
