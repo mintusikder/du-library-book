@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
 import { axiosSecure } from "../../hook/useAxiosSecure";
 import Loading from "../Shared/Loading";
 import toast from "react-hot-toast";
@@ -13,7 +12,7 @@ const AllBook = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [bookToDelete, setBookToDelete] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
+  // const [viewModalOpen, setViewModalOpen] = useState(false);
   const [updateModalOpen, setUpdateModalOpen] = useState(false);
   const [updatedBook, setUpdatedBook] = useState({});
   const [modalOpen, setModalOpen] = useState(false);
@@ -33,19 +32,17 @@ const AllBook = () => {
       });
   }, []);
 
-  const handleView = (id) => {
-    const book = books.find((b) => b._id === id);
-    setSelectedBook(book);
-    setViewModalOpen(true);
-  };
+  // const handleView = (book) => {
+  //   setSelectedBook(book);
+  //   setViewModalOpen(true);
+  // };
 
-  const closeViewModal = () => {
-    setSelectedBook(null);
-    setViewModalOpen(false);
-  };
+  // const closeViewModal = () => {
+  //   setSelectedBook(null);
+  //   setViewModalOpen(false);
+  // };
 
-  const handleBorrowed = (id) => {
-    const book = books.find((b) => b._id === id);
+  const handleBorrowed = (book) => {
     setSelectedBook(book);
     setModalOpen(true);
   };
@@ -57,8 +54,7 @@ const AllBook = () => {
 
   const handleModalSubmit = async (formData) => {
     try {
-      const response = await axiosSecure.post("/borrowedBooks", formData);
-      console.log("Borrow response:", response.data);
+      await axiosSecure.post("/borrowedBooks", formData);
       toast.success("Borrow request submitted successfully!");
       setModalOpen(false);
       setSelectedBook(null);
@@ -68,14 +64,8 @@ const AllBook = () => {
     }
   };
 
-  const openDeleteFromView = (id) => {
-    setBookToDelete(id);
-    setDeleteModalOpen(true);
-    setViewModalOpen(false);
-  };
-
-  const openDeleteModal = (id) => {
-    setBookToDelete(id);
+  const openDeleteModal = (bookId) => {
+    setBookToDelete(bookId);
     setDeleteModalOpen(true);
   };
 
@@ -99,8 +89,7 @@ const AllBook = () => {
     }
   };
 
-  const handleUpdate = (id) => {
-    const book = books.find((b) => b._id === id);
+  const handleUpdate = (book) => {
     setSelectedBook(book);
     setUpdatedBook(book);
     setUpdateModalOpen(true);
@@ -126,12 +115,12 @@ const AllBook = () => {
     }
   };
 
- const filteredBooks = books.filter((book) =>
-  `${book.book_title} ${book.author} ${book.publisher}`
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase())
-);
-
+  const filteredBooks = books.filter((book) =>
+    Object.values(book)
+      .join(" ")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
@@ -146,7 +135,7 @@ const AllBook = () => {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Search by title..."
+          placeholder="Search books..."
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -156,42 +145,48 @@ const AllBook = () => {
         />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="table w-full">
-          <thead className="bg-gray-100">
-            <tr>
-              <th>#</th>
-              <th>Book Title</th>
-              <th>Author</th>
-         <th>Publisher</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentBooks.map((book, index) => (
-              <tr key={book._id} className="hover">
-                <td>{startIdx + index + 1}</td>
-                <td>{book.book_title}</td>
-                <td>{book.author}</td>
-               <td>{book.publisher}</td>
-                <td className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => handleView(book._id)}
-                    className="btn btn-sm bg-black text-white "
-                  >
-                    View
-                  </button>
-                  <button
-                    onClick={() => handleBorrowed(book._id)}
-                    className="btn btn-sm bg-black text-white "
-                  >
-                    Borrow
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {currentBooks.map((book, index) => (
+          <div key={book._id} className="card bg-base-100 shadow-lg border border-gray-200">
+            <div className="card-body">
+              <h2 className="card-title">{book.book_title}</h2>
+              <p><strong>Author:</strong> {book.author}</p>
+              <p><strong>Publisher:</strong> {book.publisher}</p>
+              <p><strong>Category:</strong> {book.category}</p>
+              <p><strong>Volume:</strong> {book.volume}</p>
+              <p><strong>ISBN:</strong> {book.isbn}</p>
+              <p><strong>Price:</strong> {book.price}</p>
+              <p><strong>Purchase Method:</strong> {book.purchase_method}</p>
+              <p><strong>Year:</strong> {book.year}</p>
+              <div className="card-actions justify-end mt-2 flex-wrap gap-2">
+                {/* <button
+                  onClick={() => handleView(book)}
+                  className="btn btn-sm bg-black text-white"
+                >
+                  View
+                </button> */}
+                <button
+                  onClick={() => handleBorrowed(book)}
+                  className="btn btn-sm bg-black text-white"
+                >
+                  Borrow
+                </button>
+                <button
+                  onClick={() => handleUpdate(book)}
+                  className="btn btn-sm bg-black text-white"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={() => openDeleteModal(book._id)}
+                  className="btn btn-sm bg-black text-white"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <BorrowModal
@@ -201,6 +196,7 @@ const AllBook = () => {
         book={selectedBook}
       />
 
+      {/* Pagination */}
       <div className="flex justify-center gap-4 mt-6">
         <button
           className="btn"
@@ -218,41 +214,7 @@ const AllBook = () => {
         </button>
       </div>
 
-      {viewModalOpen && selectedBook && (
-        <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl relative">
-            <h3 className="text-xl font-bold mb-4 text-center">Book Details</h3>
-            <div className="text-left space-y-2 text-sm">
-              {Object.entries(selectedBook).map(
-                ([key, val]) =>
-                  key !== "_id" && (
-                    <p key={key}>
-                      <strong>{key.replace("_", " ").toUpperCase()}:</strong> {val}
-                    </p>
-                  )
-              )}
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                className="btn btn-sm bg-black text-white "
-                onClick={() => handleUpdate(selectedBook._id)}
-              >
-                Update
-              </button>
-              <button
-                className="btn btn-sm bg-black text-white "
-                onClick={() => openDeleteFromView(selectedBook._id)}
-              >
-                Delete
-              </button>
-              <button className="btn btn-sm btn-outline" onClick={closeViewModal}>
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
+      {/* Update Modal */}
       {updateModalOpen && updatedBook && (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded-lg w-full max-w-md shadow-xl relative">
@@ -287,7 +249,7 @@ const AllBook = () => {
               >
                 Cancel
               </button>
-              <button className="btn btn-sm btn-success text-white" onClick={submitUpdate}>
+              <button className="btn btn-sm bg-black text-white" onClick={submitUpdate}>
                 Update
               </button>
             </div>
@@ -295,6 +257,7 @@ const AllBook = () => {
         </div>
       )}
 
+      {/* Delete Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full text-center">

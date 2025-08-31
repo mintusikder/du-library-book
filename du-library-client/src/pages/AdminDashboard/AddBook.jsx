@@ -94,7 +94,7 @@ const AddBook = () => {
           className={`md:col-span-2 py-3 rounded-lg font-semibold text-white transition-all ${
             isLoading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gray-600 hover:bg-gray-700"
+              : "bg-[#C75D2C] hover:bg-[#D96F32]"
           }`}
           disabled={isLoading}
         >
