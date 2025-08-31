@@ -62,38 +62,38 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-10 ">
-      <h1 className="text-3xl font-bold text-indigo-600 mb-8">Welcome, Admin!</h1>
+      <h1 className="text-3xl font-bold text-[#C75D2C] mb-8">Welcome, Admin!</h1>
       <p className="mb-12 text-gray-700 text-lg">Manage books, borrowing, and more.</p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="bg-indigo-100 p-6 rounded-lg shadow-md flex items-center gap-4">
-          <FaBook className="text-indigo-700 text-4xl" />
+        <div className="bg-[#F3E9DC] p-6 rounded-lg shadow-md flex items-center gap-4">
+          <FaBook className="text-[#C75D2C] text-4xl" />
           <div>
             <h2 className="text-xl font-semibold">Total Books</h2>
-            <p className="text-3xl font-bold text-indigo-700">{totalBooks}</p>
+            <p className="text-3xl font-bold text-black">{totalBooks}</p>
           </div>
         </div>
 
-        <div className="bg-green-100 p-6 rounded-lg shadow-md flex items-center gap-4">
-          <FaBookReader className="text-green-700 text-4xl" />
+        <div className=" p-6 rounded-lg shadow-md flex items-center gap-4">
+          <FaBookReader className=" text-4xl" />
           <div>
             <h2 className="text-xl font-semibold">Total Borrowed</h2>
-            <p className="text-3xl font-bold text-green-700">{totalBorrowed}</p>
+            <p className="text-3xl font-bold text-black">{totalBorrowed}</p>
           </div>
         </div>
       </div>
 
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-5 rounded-lg shadow-md text-center border border-indigo-200">
-          <h3 className="font-semibold text-indigo-700 mb-2">Borrowed Today</h3>
+          <h3 className="font-semibold mb-2">Borrowed Today</h3>
           <p className="text-2xl font-bold">{borrowedToday}</p>
         </div>
         <div className="bg-white p-5 rounded-lg shadow-md text-center border border-green-200">
-          <h3 className="font-semibold text-green-700 mb-2">Borrowed This Week</h3>
+          <h3 className="font-semibold mb-2">Borrowed This Week</h3>
           <p className="text-2xl font-bold">{borrowedThisWeek}</p>
         </div>
         <div className="bg-white p-5 rounded-lg shadow-md text-center border border-blue-200">
-          <h3 className="font-semibold text-blue-700 mb-2">Borrowed This Month</h3>
+          <h3 className="font-semibold mb-2">Borrowed This Month</h3>
           <p className="text-2xl font-bold">{borrowedThisMonth}</p>
         </div>
       </div>

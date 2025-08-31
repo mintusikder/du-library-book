@@ -86,7 +86,7 @@ const applyFilters = () => {
   if (loading) return <Loading />;
 
   return (
-    <div className="p-5">
+    <div className="p-5 bg-[#F3E9DC] rounded-2xl">
       <h2 className="text-2xl font-semibold mb-4">Borrowed Books</h2>
 
       <div className="flex flex-col md:flex-row gap-4 mb-4 items-center justify-between">
@@ -138,7 +138,7 @@ const applyFilters = () => {
                   <td>
                     <button
                       onClick={() => openReturnModal(item)}
-                      className="btn btn-sm bg-black text-white"
+                      className="btn btn-sm bg-[#E62727] text-white"
                     >
                       Return
                     </button>

@@ -116,7 +116,7 @@ const BorrowModal = ({ isOpen, onClose, onSubmit, book }) => {
             </button>
             <button
               type="submit"
-              className="btn btn-warning btn-sm text-white"
+              className="btn bg-[#D96F32] btn-sm text-white"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Submit"}

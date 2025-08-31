@@ -129,7 +129,8 @@ const AllBook = () => {
   if (loading) return <Loading />;
 
   return (
-    <div className="p-5 relative">
+ <div className="bg-[#F3E9DC] rounded-2xl">
+     <div className="p-5 relative">
       <h2 className="text-2xl font-semibold mb-4">All Books</h2>
 
       <div className="mb-4">
@@ -167,19 +168,19 @@ const AllBook = () => {
                 </button> */}
                 <button
                   onClick={() => handleBorrowed(book)}
-                  className="btn btn-sm bg-black text-white"
+                  className="btn btn-sm bg-[#D96F32] text-white"
                 >
                   Borrow
                 </button>
                 <button
                   onClick={() => handleUpdate(book)}
-                  className="btn btn-sm bg-black text-white"
+                  className="btn btn-sm bg-[#3D74B6] text-white"
                 >
                   Update
                 </button>
                 <button
                   onClick={() => openDeleteModal(book._id)}
-                  className="btn btn-sm bg-black text-white"
+                  className="btn btn-sm bg-[#E62727] text-white"
                 >
                   Delete
                 </button>
@@ -249,7 +250,7 @@ const AllBook = () => {
               >
                 Cancel
               </button>
-              <button className="btn btn-sm bg-black text-white" onClick={submitUpdate}>
+              <button className="btn btn-sm bg-[#3D74B6] text-white" onClick={submitUpdate}>
                 Update
               </button>
             </div>
@@ -268,7 +269,7 @@ const AllBook = () => {
               <button onClick={cancelDelete} className="btn btn-outline px-4 py-2">
                 Cancel
               </button>
-              <button onClick={confirmDelete} className="btn btn-error px-4 py-2 text-white">
+              <button onClick={confirmDelete} className="btn bg-[#E62727] px-4 py-2 text-white">
                 Confirm
               </button>
             </div>
@@ -276,6 +277,7 @@ const AllBook = () => {
         </div>
       )}
     </div>
+ </div>
   );
 };
 

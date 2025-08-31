@@ -17,13 +17,13 @@ const AdminLayout = () => {
   const { role } = useRole(user?.email);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const activeClass = "text-indigo-300 font-semibold";
+  const activeClass = "text-[#C75D2C]  font-semibold";
 
   const navLinks = (
     <>
       <Link
         to="/"
-        className="flex items-center gap-2 hover:text-indigo-200 transition duration-200"
+        className="flex items-center gap-2 hover:text-[#C75D2C]  transition duration-200"
         onClick={() => setSidebarOpen(false)}
       >
         <FaHome />
@@ -33,7 +33,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/home"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
+          `flex items-center gap-2 hover:text-[#C75D2C] transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -46,7 +46,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/add-book"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
+          `flex items-center gap-2 hover:text-[#C75D2C]  transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -59,7 +59,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/all-book"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
+          `flex items-center gap-2 hover:text-[#C75D2C]  transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -72,7 +72,7 @@ const AdminLayout = () => {
       <NavLink
         to="/dashboard/borrowed-book"
         className={({ isActive }) =>
-          `flex items-center gap-2 hover:text-indigo-200 transition duration-200 ${
+          `flex items-center gap-2 hover:text-[#C75D2C] transition duration-200 ${
             isActive ? activeClass : ""
           }`
         }
@@ -87,7 +87,7 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Top Navbar */}
-      <header className="bg-black text-white flex items-center justify-between px-4 py-3">
+      <header className="bg-[#F3E9DC] text-black flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           {/* Mobile menu button */}
           <button
